@@ -1,4 +1,5 @@
 (ns reagent-wysiwyg.main
+  (:gen-class)
   (:require [cljfx.api :as fx]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -349,39 +350,39 @@
   {:fx/type :button
    :text text
    :disable (boolean disabled?)
-   :on-action #(dispatch! {:event event})})
+   :on-action (fn [_] (dispatch! {:event event}))})
 
 (defn- menu-bar []
   {:fx/type :menu-bar
    :menus [{:fx/type :menu
             :text "File"
             :items [{:fx/type :menu-item :text "New" :accelerator [:shortcut :n]
-                     :on-action #(dispatch! {:event :new})}
+                     :on-action (fn [_] (dispatch! {:event :new}))}
                     {:fx/type :menu-item :text "Open…" :accelerator [:shortcut :o]
-                     :on-action #(dispatch! {:event :open})}
+                     :on-action (fn [_] (dispatch! {:event :open}))}
                     {:fx/type :separator-menu-item}
                     {:fx/type :menu-item :text "Save" :accelerator [:shortcut :s]
-                     :on-action #(dispatch! {:event :save})}
+                     :on-action (fn [_] (dispatch! {:event :save}))}
                     {:fx/type :menu-item :text "Save As…" :accelerator [:shortcut :shift :s]
-                     :on-action #(dispatch! {:event :save-as})}
+                     :on-action (fn [_] (dispatch! {:event :save-as}))}
                     {:fx/type :menu-item :text "Export Component…"
-                     :on-action #(dispatch! {:event :export})}
+                     :on-action (fn [_] (dispatch! {:event :export}))}
                     {:fx/type :separator-menu-item}
                     {:fx/type :menu-item :text "Exit"
-                     :on-action #(dispatch! {:event :exit})}]}
+                     :on-action (fn [_] (dispatch! {:event :exit}))}]}
            {:fx/type :menu
             :text "Edit"
             :items [{:fx/type :menu-item :text "Undo" :accelerator [:shortcut :z]
-                     :on-action #(dispatch! {:event :undo})}
+                     :on-action (fn [_] (dispatch! {:event :undo}))}
                     {:fx/type :menu-item :text "Redo" :accelerator [:shortcut :shift :z]
-                     :on-action #(dispatch! {:event :redo})}
+                     :on-action (fn [_] (dispatch! {:event :redo}))}
                     {:fx/type :separator-menu-item}
                     {:fx/type :menu-item :text "Duplicate"
-                     :on-action #(dispatch! {:event :duplicate})}
+                     :on-action (fn [_] (dispatch! {:event :duplicate}))}
                     {:fx/type :menu-item :text "Delete" :accelerator [:delete]
-                     :on-action #(dispatch! {:event :delete})}
+                     :on-action (fn [_] (dispatch! {:event :delete}))}
                     {:fx/type :menu-item :text "Copy Hiccup" :accelerator [:shortcut :shift :c]
-                     :on-action #(dispatch! {:event :copy})}]}]})
+                     :on-action (fn [_] (dispatch! {:event :copy}))}]}]})
 
 (defn- palette-view []
   {:fx/type :scroll-pane
@@ -403,11 +404,12 @@
                                     :text label
                                     :max-width ##Inf
                                     :alignment :center-left
-                                    :on-action #(dispatch! {:event :insert
-                                                            :tag tag
-                                                            :attrs (or attrs {})
-                                                            :target-id (:selected-id @app-state)
-                                                            :position :inside})
+                                    :on-action (fn [_]
+                                                 (dispatch! {:event :insert
+                                                             :tag tag
+                                                             :attrs (or attrs {})
+                                                             :target-id (:selected-id @app-state)
+                                                             :position :inside}))
                                     :on-drag-detected (palette-drag tag (or attrs {}))})
                                  items))})
                    model/palette-groups)}})
@@ -427,7 +429,7 @@
                       :style (cond-> {:-fx-padding (str "5 6 5 " (+ 8 (* depth 14)))
                                       :-fx-background-color :transparent}
                                (= id selected-id) (assoc :-fx-background-color "#dfe7ff"))
-                      :on-action #(dispatch! {:event :select :id id})})
+                      :on-action (fn [_] (dispatch! {:event :select :id id}))})
                    (model/outline root))}})
 
 (defn- field-row [label value on-change]
@@ -449,7 +451,7 @@
                :text (str (or value ""))
                :on-text-changed #(dispatch! {:event change-event :key key :value %})}
               {:fx/type :button :text "×"
-               :on-action #(dispatch! {:event remove-event :key key})}]})
+               :on-action (fn [_] (dispatch! {:event remove-event :key key}))}]})
 
 (defn- inspector-view [app-state]
   (let [selected (model/find-node (:root app-state) (:selected-id app-state))]
@@ -498,7 +500,7 @@
                           :on-text-changed #(dispatch! {:event :ui-field :key :new-attr-value :value %})
                           :grid-pane/column 1}
                          {:fx/type :button :text "+"
-                          :on-action #(dispatch! {:event :add-attr})
+                          :on-action (fn [_] (dispatch! {:event :add-attr}))
                           :grid-pane/column 2}]}
              {:fx/type :separator}
              {:fx/type :label :text "Styles"
@@ -518,7 +520,7 @@
                           :on-text-changed #(dispatch! {:event :ui-field :key :new-style-value :value %})
                           :grid-pane/column 1}
                          {:fx/type :button :text "+"
-                          :on-action #(dispatch! {:event :add-style})
+                          :on-action (fn [_] (dispatch! {:event :add-style}))
                           :grid-pane/column 2}]}]))))}}))
 
 (defn- web-view [root selected-id]
@@ -548,9 +550,9 @@
                 {:fx/type :region :h-box/hgrow :always}
                 {:fx/type :button :text "Apply"
                  :disable (not (:source-dirty? app-state))
-                 :on-action #(dispatch! {:event :source-apply})}
+                 :on-action (fn [_] (dispatch! {:event :source-apply}))}
                 {:fx/type :button :text "Copy"
-                 :on-action #(dispatch! {:event :copy})}]}
+                 :on-action (fn [_] (dispatch! {:event :copy}))}]}
     {:fx/type :h-box
      :spacing 8
      :alignment :center-left

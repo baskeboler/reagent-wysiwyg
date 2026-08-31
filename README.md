@@ -34,6 +34,29 @@ For a repeatable JavaFX/WebView bridge smoke test on a headless Linux machine:
 xvfb-run -a clojure -M:smoke
 ```
 
+## Build an executable uberjar
+
+Build the application and all runtime dependencies into one executable JAR:
+
+```bash
+clojure -T:build uber
+```
+
+The default artifact is `target/reagent-wysiwyg-0.1.0-standalone.jar`. Run it with:
+
+```bash
+java --enable-native-access=ALL-UNNAMED \
+  -jar target/reagent-wysiwyg-0.1.0-standalone.jar
+```
+
+Supply another artifact version when needed:
+
+```bash
+clojure -T:build uber :version '"0.2.0"'
+```
+
+Remove generated build output with `clojure -T:build clean`.
+
 An editable example is available at `examples/sample.cljs`.
 
 ## Workflow
