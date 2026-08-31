@@ -1,0 +1,12 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.5"}
+        cljfx/cljfx {:mvn/version "1.10.10"}
+        rewrite-clj/rewrite-clj {:mvn/version "1.2.55"}}
+ :aliases
+ {:run {:jvm-opts ["--enable-native-access=ALL-UNNAMED"]
+        :main-opts ["-m" "reagent-wysiwyg.main"]}
+  :test {:extra-paths ["test"]
+         :main-opts ["-m" "reagent-wysiwyg.test-runner"]}
+  :smoke {:extra-paths ["test"]
+          :jvm-opts ["--enable-native-access=ALL-UNNAMED"]
+          :main-opts ["-m" "reagent-wysiwyg.ui-smoke"]}}}
