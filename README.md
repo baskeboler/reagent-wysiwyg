@@ -63,7 +63,7 @@ An editable example is available at `examples/sample.cljs`.
 
 1. Drag a component from the Palette tab onto the canvas. Dropping near an element's top or bottom edge inserts before or after it; dropping in the middle inserts inside containers.
 2. Click a rendered element or text node to select it. The Outline tab and inspector follow the selection.
-3. Use the inspector to edit attributes, inline styles, or text. Use the toolbar to reorder, duplicate, delete, undo, and redo.
+3. Use the inspector to edit attributes, inline styles, or text. **Move Up**, **Move Down**, and **Delete Selected** act on the current canvas/outline selection; `Alt+Up`, `Alt+Down`, and `Delete` provide the same actions from the keyboard. The protected root cannot be moved or deleted.
 4. Edit the Hiccup pane directly when useful, then choose **Apply**. Invalid drafts leave the last valid canvas untouched.
 5. Open a `.cljs` or `.cljc` file to edit a supported zero-argument component. If several components qualify, the editor asks which one to use.
 6. Save to replace only the selected function body, or export a standalone namespace/component file. **Copy Hiccup** copies only the generated vector.

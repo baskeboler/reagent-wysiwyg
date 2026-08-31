@@ -352,7 +352,9 @@
    :disable (boolean disabled?)
    :on-action (fn [_] (dispatch! {:event event}))})
 
-(defn- menu-bar []
+(defn- menu-bar [app-state]
+  (let [root (:root app-state)
+        selected-id (:selected-id app-state)]
   {:fx/type :menu-bar
    :menus [{:fx/type :menu
             :text "File"
@@ -379,10 +381,17 @@
                     {:fx/type :separator-menu-item}
                     {:fx/type :menu-item :text "Duplicate"
                      :on-action (fn [_] (dispatch! {:event :duplicate}))}
-                    {:fx/type :menu-item :text "Delete" :accelerator [:delete]
+                    {:fx/type :menu-item :text "Move Up" :accelerator [:alt :up]
+                     :disable (not (model/can-move-sibling? root selected-id -1))
+                     :on-action (fn [_] (dispatch! {:event :move-up}))}
+                    {:fx/type :menu-item :text "Move Down" :accelerator [:alt :down]
+                     :disable (not (model/can-move-sibling? root selected-id 1))
+                     :on-action (fn [_] (dispatch! {:event :move-down}))}
+                    {:fx/type :menu-item :text "Delete Selected" :accelerator [:delete]
+                     :disable (not (model/deletable? root selected-id))
                      :on-action (fn [_] (dispatch! {:event :delete}))}
                     {:fx/type :menu-item :text "Copy Hiccup" :accelerator [:shortcut :shift :c]
-                     :on-action (fn [_] (dispatch! {:event :copy}))}]}]})
+                     :on-action (fn [_] (dispatch! {:event :copy}))}]}]}))
 
 (defn- palette-view []
   {:fx/type :scroll-pane
@@ -472,16 +481,21 @@
           :on-text-changed #(dispatch! {:event :text-change :value %})}]
         (let [attrs (:attrs selected)
               generic (dissoc attrs :style)
-              styles (:style attrs {})]
+              styles (:style attrs {})
+              root (:root app-state)
+              selected-id (:selected-id app-state)]
           (vec
            (concat
             [{:fx/type :label :text (str "<" (name (:tag selected)) ">")
               :style {:-fx-font-size 17 :-fx-font-weight :bold}}
              {:fx/type :h-box :spacing 5
-              :children [(toolbar-button "↑" :move-up)
-                         (toolbar-button "↓" :move-down)
+              :children [(toolbar-button "↑" :move-up
+                                         (not (model/can-move-sibling? root selected-id -1)))
+                         (toolbar-button "↓" :move-down
+                                         (not (model/can-move-sibling? root selected-id 1)))
                          (toolbar-button "Duplicate" :duplicate)
-                         (toolbar-button "Delete" :delete (= (:id selected) (:id (:root app-state))))]}
+                         (toolbar-button "Delete" :delete
+                                         (not (model/deletable? root selected-id)))]}
              {:fx/type :separator}
              {:fx/type :label :text "Attributes"
               :style {:-fx-font-weight :bold}}]
@@ -580,6 +594,8 @@
        :style {:-fx-text-fill "#687386"}})]})
 
 (defn app-view [app-state]
+  (let [root (:root app-state)
+        selected-id (:selected-id app-state)]
   {:fx/type fx/ext-on-instance-lifecycle
    :on-created #(reset! stage-instance %)
    :on-deleted (fn [_] (reset! stage-instance nil))
@@ -599,7 +615,7 @@
      :root
      {:fx/type :v-box
       :children
-      [(menu-bar)
+      [(menu-bar app-state)
        {:fx/type :tool-bar
         :items [(toolbar-button "New" :new)
                 (toolbar-button "Open" :open)
@@ -608,7 +624,12 @@
                 (toolbar-button "Undo" :undo (empty? (:history app-state)))
                 (toolbar-button "Redo" :redo (empty? (:future app-state)))
                 (toolbar-button "Duplicate" :duplicate)
-                (toolbar-button "Delete" :delete)
+                (toolbar-button "Move Up" :move-up
+                                (not (model/can-move-sibling? root selected-id -1)))
+                (toolbar-button "Move Down" :move-down
+                                (not (model/can-move-sibling? root selected-id 1)))
+                (toolbar-button "Delete Selected" :delete
+                                (not (model/deletable? root selected-id)))
                 {:fx/type :separator}
                 {:fx/type :label
                  :text "Tip: drag palette items onto the canvas; click any element to inspect it."
@@ -639,7 +660,7 @@
                    {:fx/type :region :h-box/hgrow :always}
                    {:fx/type :label
                     :text (str (count (model/outline (:root app-state))) " nodes")
-                    :style {:-fx-text-fill "#cbd3e1"}}]}]}}}})
+                   :style {:-fx-text-fill "#cbd3e1"}}]}]}}}}))
 
 (defn -main [& _]
   (let [renderer (fx/create-renderer

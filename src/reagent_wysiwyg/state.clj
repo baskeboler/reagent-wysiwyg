@@ -67,9 +67,15 @@
 (defn delete-selected [state]
   (let [id (:selected-id state)
         parent (model/parent-of (:root state) id)
+        index (when parent (model/child-index parent id))
+        siblings (:children parent)
+        next-selection (when parent
+                         (or (some-> (get siblings (inc index)) :id)
+                             (some-> (get siblings (dec index)) :id)
+                             (:id parent)))
         root (model/remove-node (:root state) id)]
     (if root
-      (commit-root state root (or (:id parent) (:id root)) "Deleted component")
+      (commit-root state root (or next-selection (:id root)) "Deleted selected component")
       (assoc state :status "The root component cannot be deleted"))))
 
 (defn duplicate-selected [state]

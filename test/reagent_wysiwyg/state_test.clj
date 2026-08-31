@@ -38,3 +38,16 @@
                        (state/initial-state)
                        (range (+ state/history-limit 20)))]
     (is (= state/history-limit (count (:history result))))))
+
+(deftest move-and-delete-operate-on-current-selection
+  (let [first-child (model/palette-node :p)
+        selected (model/palette-node :button)
+        root (model/element-node :div {} [first-child selected])
+        initial (assoc (state/initial-state) :root root :selected-id (:id selected))
+        moved (state/move-selected initial -1)
+        deleted (state/delete-selected moved)]
+    (is (= [(:id selected) (:id first-child)] (mapv :id (:children (:root moved)))))
+    (is (= (:id selected) (:selected-id moved)))
+    (is (= [(:id first-child)] (mapv :id (:children (:root deleted)))))
+    (is (= (:id first-child) (:selected-id deleted)))
+    (is (= "Deleted selected component" (:status deleted)))))

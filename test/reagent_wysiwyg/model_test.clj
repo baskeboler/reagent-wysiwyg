@@ -51,3 +51,15 @@
     (is (= "red" (get-in styled [:attrs :style :color])))
     (is (= "new" (get-in styled [:children 0 :value])))
     (is (nil? (get-in (model/remove-style styled (:id root) :color) [:attrs :style])))))
+
+(deftest selected-node-capabilities-reflect-root-and-sibling-edges
+  (let [first-child (model/palette-node :p)
+        middle-child (model/palette-node :button)
+        last-child (model/palette-node :input)
+        root (model/element-node :div {} [first-child middle-child last-child])]
+    (is (false? (model/deletable? root (:id root))))
+    (is (true? (model/deletable? root (:id middle-child))))
+    (is (false? (model/can-move-sibling? root (:id first-child) -1)))
+    (is (true? (model/can-move-sibling? root (:id middle-child) -1)))
+    (is (true? (model/can-move-sibling? root (:id middle-child) 1)))
+    (is (false? (model/can-move-sibling? root (:id last-child) 1)))))

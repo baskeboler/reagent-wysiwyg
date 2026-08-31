@@ -130,8 +130,18 @@
                 node))]
       (remove* root))))
 
-(defn- child-index [parent id]
+(defn child-index [parent id]
   (first (keep-indexed #(when (= id (:id %2)) %1) (:children parent))))
+
+(defn deletable? [root id]
+  (and (some? (find-node root id))
+       (not= id (:id root))))
+
+(defn can-move-sibling? [root id direction]
+  (when-let [parent (parent-of root id)]
+    (let [index (child-index parent id)
+          destination (+ index direction)]
+      (< -1 destination (count (:children parent))))))
 
 (defn insert-node
   "Insert node relative to target-id. Position is :inside, :before or :after."
